@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { genZamiqNumber } from "@/lib/supabase";
+import { genZamiqNumber } from "../lib/supabase";
 
 const CHATS = [
   { id: 1, name: "Lola", zamiq: "+1 (800) 736-7123", time: "11:42 AM", msg: "You: Soft! I felt am", unread: 2 },

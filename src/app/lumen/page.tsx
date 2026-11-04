@@ -1,112 +1,106 @@
 'use client'
 import React from 'react'
 
+const VIDEOS = [
+  {id:1, user:'@yaba_girl', name:'Lola', feeling:'Soft', text:'Morning for Yaba market 🌅 soft vibes only', likes:'12.4K', comments:'342', isPOV:true},
+  {id:2, user:'@emeka_runs', name:'Emeka', feeling:'Focus', text:'5am delivery run ⚓ locked in', likes:'8.1K', comments:'120', isPOV:false},
+  {id:3, user:'@mum_lagos', name:'Mum', feeling:'Calm', text:'Jollof ready for lunch 😊', likes:'23K', comments:'892', isPOV:false},
+]
+
 export default function Lumen() {
-  const [recording, setRecording] = React.useState(false)
-  const [facing, setFacing] = React.useState<'environment'|'user'>('environment')
-  const [videos, setVideos] = React.useState<any[]>([
-    {id:1, user:'You • POV', time:'Now', feeling:'Soft', cam:'back'},
-  ])
-  const [feel, setFeel] = React.useState('Soft')
+  const [active, setActive] = React.useState(0)
+  const [liked, setLiked] = React.useState<any>({})
   const videoRef = React.useRef<any>(null)
-  const [stream, setStream] = React.useState<any>(null)
+  const [isRecording, setIsRecording] = React.useState(false)
 
-  const startCam = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}, audio:true})
-      setStream(s)
-      if (videoRef.current) videoRef.current.srcObject = s
-      setRecording(true)
-      setTimeout(()=>{
-        stopCam()
-        setVideos(v=>[{id:Date.now(), user:`You • ${facing==='user' ? 'Front' : 'POV'}`, time:'Just now', feeling:feel, cam:facing}, ...v])
-      }, 5000)
-    } catch(e) {
-      setRecording(true)
-      setTimeout(()=>{
-        setRecording(false)
-        setVideos(v=>[{id:Date.now(), user:`You • ${facing==='user' ? 'Front' : 'POV'}`, time:'Just now', feeling:feel, cam:facing}, ...v])
-      }, 2000)
-    }
-  }
+  const v = VIDEOS[active]
 
-  const stopCam = () => {
-    if (stream) stream.getTracks().forEach((t:any)=>t.stop())
-    setRecording(false)
-    setStream(null)
-  }
-
-  const switchCam = () => {
-    const newFacing = facing==='environment' ? 'user' : 'environment'
-    setFacing(newFacing)
-    if (stream) {
-      stream.getTracks().forEach((t:any)=>t.stop())
-      setStream(null)
-      setTimeout(async ()=>{
-        try {
-          const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:newFacing}, audio:true})
-          setStream(s)
-          if (videoRef.current) videoRef.current.srcObject = s
-        } catch {}
-      }, 100)
-    }
-  }
-
-  React.useEffect(()=>{
-    if (recording) startCam()
-    // eslint-disable-next-line
-  }, [facing])
+  const next = () => setActive(a=> (a+1)%VIDEOS.length)
+  const prev = () => setActive(a=> a===0 ? VIDEOS.length-1 : a-1)
 
   return (
-    <div style={{background:'#0A1931', minHeight:'100vh', color:'white', fontFamily:'sans-serif', padding:'16px'}}>
-      <h2 style={{color:'#D4AF37', margin:'0 0 20px 0'}}>🌟 LUMEN - POV Stories</h2>
+    <div style={{background:'black', height:'100vh', width:'100vw', position:'relative', overflow:'hidden', fontFamily:'-apple-system, sans-serif', color:'white'}}>
       
-      {recording && (
-        <div style={{background:'black', height:'320px', borderRadius:'16px', overflow:'hidden', position:'relative', marginBottom:'16px'}}>
-          <video ref={videoRef} autoPlay muted playsInline style={{width:'100%', height:'100%', objectFit:'cover', transform: facing==='user' ? 'scaleX(-1)' : 'none'}}></video>
-          <div style={{position:'absolute', top:'12px', left:'12px', background:'#ff4d4d', padding:'4px 8px', borderRadius:'6px', fontSize:'12px', fontWeight:'bold'}}>● REC {facing==='user' ? 'Front' : 'Back'} cam</div>
-          <div onClick={switchCam} style={{position:'absolute', top:'12px', right:'12px', background:'#112240', padding:'6px 10px', borderRadius:'20px', fontSize:'12px', cursor:'pointer'}}>🔄 Switch to {facing==='user' ? 'Back' : 'Front'}</div>
-          <div style={{position:'absolute', bottom:'12px', left:'0', right:'0', display:'flex', justifyContent:'center', gap:'20px', alignItems:'center'}}>
-            <div onClick={switchCam} style={{background:'#112240', width:'40px', height:'40px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer'}}>🔄</div>
-            <div onClick={stopCam} style={{background:'#ff4d4d', width:'60px', height:'60px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', border:'3px solid white'}}>⏹️</div>
-            <div style={{width:'40px'}}></div>
-          </div>
+      {/* VIDEO BACKGROUND - TikTok */}
+      <div style={{
+        position:'absolute', inset:0,
+        background: v.isPOV ? 'linear-gradient(180deg, #1a1a1a 0%, #000 100%)' : '#111',
+        display:'flex', alignItems:'center', justifyContent:'center'
+      }}>
+        {/* Mock video */}
+        <div style={{textAlign:'center'}}>
+          <div style={{fontSize:'80px', opacity:0.8}}>{v.isPOV ? '📹' : '🤳'}</div>
+          <p style={{marginTop:'12px', fontSize:'14px', opacity:0.5, letterSpacing:'2px'}}>{v.isPOV ? 'POV • BACK CAMERA' : 'FRONT CAMERA'} • {v.feeling}</p>
         </div>
-      )}
-
-      {!recording && (
-        <>
-          <div style={{display:'flex', gap:'8px', marginBottom:'12px'}}>
-            <span onClick={()=>setFacing('environment')} style={{background: facing==='environment' ? '#D4AF37' : '#112240', color: facing==='environment' ? '#0A1931' : 'white', padding:'8px 14px', borderRadius:'20px', fontSize:'13px', cursor:'pointer', fontWeight:'bold'}}>📹 Back (POV)</span>
-            <span onClick={()=>setFacing('user')} style={{background: facing==='user' ? '#D4AF37' : '#112240', color: facing==='user' ? '#0A1931' : 'white', padding:'8px 14px', borderRadius:'20px', fontSize:'13px', cursor:'pointer', fontWeight:'bold'}}>🤳 Front (Selfie)</span>
-          </div>
-          <div onClick={startCam} style={{background:'#112240', height:'120px', borderRadius:'16px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', cursor:'pointer', border:'2px dashed #D4AF37', marginBottom:'16px'}}>
-            <div style={{fontSize:'32px'}}>{facing==='user' ? '🤳' : '📹'}</div>
-            <p style={{margin:'8px 0 0 0', color:'#D4AF37', fontWeight:'bold'}}>Tap to Record {facing==='user' ? 'Front' : 'POV'} (5 sec)</p>
-            <p style={{margin:'4px 0 0 0', fontSize:'11px', opacity:0.5}}>{facing==='user' ? 'Front camera - show your face' : 'Back camera - show wetin dey front'}</p>
-          </div>
-        </>
-      )}
-
-      <div style={{display:'flex', gap:'8px', marginBottom:'16px'}}>
-        {['Soft','Focus','Raw','Calm'].map(m=>(
-          <span key={m} onClick={()=>setFeel(m)} style={{background: feel===m ? '#D4AF37' : '#112240', color: feel===m ? '#0A1931' : 'white', padding:'6px 12px', borderRadius:'20px', fontSize:'13px', cursor:'pointer', fontWeight: feel===m ? 'bold' : 'normal'}}>{m}</span>
-        ))}
+        {/* Gradient overlays */}
+        <div style={{position:'absolute', top:0, left:0, right:0, height:'120px', background:'linear-gradient(180deg, rgba(0,0,0,0.5), transparent)'}}></div>
+        <div style={{position:'absolute', bottom:0, left:0, right:0, height:'300px', background:'linear-gradient(0deg, rgba(0,0,0,0.7), transparent)'}}></div>
       </div>
-      
-      {videos.map(v=>(
-        <div key={v.id} style={{background:'#112240', padding:'12px', borderRadius:'12px', marginBottom:'10px'}}>
-          <div style={{background:'black', height:'140px', borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center'}}>{v.cam==='user' ? '🤳' : '📹'} {v.cam==='user' ? 'Front' : 'POV'} • {v.feeling}</div>
-          <div style={{display:'flex', justifyContent:'space-between', marginTop:'8px'}}>
-            <p style={{margin:0, fontSize:'13px', fontWeight:'bold'}}>{v.user}</p>
-            <p style={{margin:0, fontSize:'12px', opacity:0.6}}>{v.time}</p>
-          </div>
+
+      {/* TOP BAR - TikTok */}
+      <div style={{position:'absolute', top:0, left:0, right:0, padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', zIndex:10}}>
+        <a href="/" style={{color:'white', textDecoration:'none', fontSize:'16px', fontWeight:'600'}}>‹</a>
+        <div style={{display:'flex', gap:'20px', fontSize:'15px', fontWeight:'600'}}>
+          <span style={{opacity:0.6}}>Following</span>
+          <span style={{borderBottom:'2px solid white', paddingBottom:'4px'}}>For You • LUMEN</span>
         </div>
-      ))}
-
-      <div style={{marginTop:'20px'}}>
-        <a href="/" style={{color:'white', opacity:0.6, textDecoration:'none'}}>← Chats</a>
+        <span style={{fontSize:'20px'}}>🔍</span>
       </div>
+
+      {/* RIGHT ACTIONS - TikTok */}
+      <div style={{position:'absolute', right:'12px', bottom:'120px', display:'flex', flexDirection:'column', gap:'22px', alignItems:'center', zIndex:10}}>
+        <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+          <div style={{width:'48px', height:'48px', borderRadius:'50%', background:'#222', border:'2px solid white', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'700'}}>{v.name[0]}</div>
+          <div style={{width:'20px', height:'20px', background:'#FF2D55', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', marginTop:'-10px', fontSize:'12px', fontWeight:'800'}}>+</div>
+        </div>
+
+        <div onClick={()=>setLiked(l=>({...l, [v.id]:!l[v.id]}))} style={{display:'flex', flexDirection:'column', alignItems:'center', cursor:'pointer'}}>
+          <div style={{width:'48px', height:'48px', borderRadius:'50%', background:'rgba(255,255,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'28px'}}>{liked[v.id] ? '❤️' : '🤍'}</div>
+          <span style={{marginTop:'4px', fontSize:'12px', fontWeight:'600'}}>{v.likes}</span>
+        </div>
+
+        <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+          <div style={{width:'48px', height:'48px', borderRadius:'50%', background:'rgba(255,255,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'26px'}}>💬</div>
+          <span style={{marginTop:'4px', fontSize:'12px', fontWeight:'600'}}>{v.comments}</span>
+        </div>
+
+        <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+          <div style={{width:'48px', height:'48px', borderRadius:'50%', background:'rgba(255,255,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'26px'}}>↗️</div>
+          <span style={{marginTop:'4px', fontSize:'12px', fontWeight:'600'}}>Share</span>
+        </div>
+
+        <div style={{width:'48px', height:'48px', borderRadius:'12px', background:'#333', display:'flex', alignItems:'center', justifyContent:'center'}}>🎵</div>
+      </div>
+
+      {/* BOTTOM INFO - TikTok */}
+      <div style={{position:'absolute', bottom:'20px', left:'12px', right:'80px', zIndex:10}}>
+        <p style={{margin:0, fontWeight:'700', fontSize:'15px'}}>{v.user}</p>
+        <p style={{margin:'6px 0 0', fontSize:'14px', lineHeight:'1.3', opacity:0.9}}>{v.text}</p>
+        <div style={{marginTop:'8px', display:'flex', gap:'6px'}}>
+          <span style={{background:'rgba(255,255,255,0.15)', padding:'4px 8px', borderRadius:'4px', fontSize:'12px', fontWeight:'600'}}>#{v.feeling}</span>
+          <span style={{background:'rgba(255,255,255,0.15)', padding:'4px 8px', borderRadius:'4px', fontSize:'12px'}}>{v.isPOV ? '#POV' : '#Selfie'}</span>
+        </div>
+        <div style={{marginTop:'10px', display:'flex', alignItems:'center', gap:'8px'}}>
+          <span style={{fontSize:'12px'}}>🎵 Original sound • {v.name}</span>
+        </div>
+      </div>
+
+      {/* Swipe Areas - TikTok gesture */}
+      <div onClick={prev} style={{position:'absolute', top:'80px', left:0, right:'70px', height:'40%', zIndex:5}}></div>
+      <div onClick={next} style={{position:'absolute', bottom:'100px', left:0, right:'70px', height:'40%', zIndex:5}}></div>
+
+      {/* Progress Bar */}
+      <div style={{position:'absolute', bottom:0, left:0, right:0, height:'2px', background:'rgba(255,255,255,0.2)', zIndex:20}}>
+        <div style={{width:'42%', height:'100%', background:'white'}}></div>
+      </div>
+
+      {/* Record Button - Center Bottom */}
+      <div onClick={()=>setIsRecording(!isRecording)} style={{position:'absolute', bottom:'18px', left:'50%', transform:'translateX(-50%)', width:'60px', height:'60px', borderRadius:'50%', background: isRecording ? '#FF2D55' : 'white', border:'4px solid rgba(255,255,255,0.3)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', zIndex:20}}>
+        <span style={{fontSize:'24px'}}>{isRecording ? '⏹️' : '📹'}</span>
+      </div>
+
+      {/* Tap hint */}
+      <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'rgba(0,0,0,0.6)', padding:'8px 12px', borderRadius:'20px', fontSize:'11px', opacity:0.5, pointerEvents:'none', zIndex:1}}>Tap top/bottom to swipe • {active+1}/{VIDEOS.length}</div>
     </div>
   )
-          }
+}

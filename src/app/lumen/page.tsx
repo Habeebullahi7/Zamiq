@@ -1,158 +1,191 @@
 'use client'
 import { useState, useRef } from 'react'
 
+type Post = {
+  id:number
+  name:string
+  handle:string
+  text:string
+  image?:string
+  video?:string
+  feeling:string
+  likes:number
+  views:number
+  comments:number
+  liked?:boolean
+  time:string
+}
+
 export default function Lumen(){
-  const [mode, setMode] = useState<'view'|'record'>('view')
-  const [facing, setFacing] = useState<'user'|'environment'>('environment') // POV = back camera
-  const [recording, setRecording] = useState(false)
-  const [seconds, setSeconds] = useState(0)
-  const [videos, setVideos] = useState<any[]>([
-    {id:1, url:'', feeling:'Soft', views:2341, likes:342, comments:3, name:'Lola', pov:true},
+  const [posts, setPosts] = useState<Post[]>([
+    {id:1, name:'Lola', handle:'yaba_girl', text:'Morning light for Yaba market. Everything soft today. Who dey around?', feeling:'Soft', likes:342, views:2341, comments:12, time:'2m', image:''},
+    {id:2, name:'Emeka', handle:'emeka_runs', text:'5am run done. Sabo to Yaba. Focus mode.', feeling:'Focus', likes:120, views:1820, comments:3, time:'12m'},
   ])
-  const [active, setActive] = useState(0)
+  const [newText, setNewText] = useState('')
   const [feeling, setFeeling] = useState('Soft')
-  
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const mediaRef = useRef<MediaRecorder|null>(null)
-  const streamRef = useRef<MediaStream|null>(null)
-  const chunksRef = useRef<Blob[]>([])
-  const timerRef = useRef<any>(null)
+  const [showComposer, setShowComposer] = useState(false)
+  const [preview, setPreview] = useState('')
+  const [dmOpen, setDmOpen] = useState<Post|null>(null)
+  const [dmText, setDmText] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  const startCamera = async (face = facing) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video:{facingMode:face, width:{ideal:1080}, height:{ideal:1920}},
-        audio:true
-      })
-      streamRef.current = stream
-      if(videoRef.current){ videoRef.current.srcObject = stream; videoRef.current.play() }
-    } catch(e){ alert('Camera need permission - allow camera for LUMEN') }
-  }
-
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach(t=>t.stop())
-  }
-
-  const startRecord = async () => {
-    if(!streamRef.current) await startCamera()
-    chunksRef.current = []
-    const mr = new MediaRecorder(streamRef.current!, {mimeType:'video/webm'})
-    mediaRef.current = mr
-    mr.ondataavailable = e=> { if(e.data.size>0) chunksRef.current.push(e.data) }
-    mr.onstop = () => {
-      const blob = new Blob(chunksRef.current, {type:'video/webm'})
-      const url = URL.createObjectURL(blob)
-      setVideos(v=>[{id:Date.now(), url, feeling, views:0, likes:0, comments:0, name:'You', pov: facing==='environment'}, ...v])
-      setActive(0)
-      setMode('view')
-      stopCamera()
+  const createPost = () => {
+    if(!newText && !preview) return
+    const p:Post = {
+      id:Date.now(),
+      name:'You',
+      handle:'you',
+      text:newText,
+      image: preview.includes('image') ? preview : '',
+      video: preview.includes('video') ? preview : '',
+      feeling,
+      likes:0, views:1, comments:0,
+      time:'now'
     }
-    mr.start()
-    setRecording(true)
-    setSeconds(0)
-    timerRef.current = setInterval(()=>setSeconds(s=>{ if(s>=5){ stopRecord(); return 5 } return s+1 }), 1000)
+    setPosts([p, ...posts])
+    setNewText(''); setPreview(''); setShowComposer(false)
   }
 
-  const stopRecord = () => {
-    clearInterval(timerRef.current)
-    if(mediaRef.current && mediaRef.current.state==='recording') mediaRef.current.stop()
-    setRecording(false)
+  const onFile = (e:any) => {
+    const file = e.target.files[0]
+    if(!file) return
+    const url = URL.createObjectURL(file)
+    setPreview(url)
   }
 
-  const switchCamera = async () => {
-    const newFace = facing==='environment' ? 'user' : 'environment'
-    setFacing(newFace)
-    stopCamera()
-    await startCamera(newFace)
+  const like = (id:number) => {
+    setPosts(posts.map(p=> p.id===id ? {...p, likes: p.liked ? p.likes-1 : p.likes+1, liked: !p.liked} : p))
   }
 
-  const openRecord = async () => {
-    setMode('record')
-    setTimeout(()=>startCamera(), 100)
+  const sendDM = () => {
+    if(!dmText || !dmOpen) return
+    alert(`DM sent to @${dmOpen.handle}: "${dmText}" - e go show for Chats`)
+    setDmText(''); setDmOpen(null)
   }
 
-  const s = videos[active]
+  return(
+    <div style={{minHeight:'100vh', background:'#000', color:'white', fontFamily:'-apple-system, system-ui', maxWidth:'600px', margin:'0 auto', borderLeft:'1px solid #222', borderRight:'1px solid #222'}}>
 
-  // VIEW MODE
-  if(mode==='view'){
-    return(
-      <div style={{minHeight:'100vh', background:'#0A0A0B', color:'white', fontFamily:'system-ui', display:'flex', flexDirection:'column'}}>
-        <div style={{padding:'18px 20px', display:'flex', justifyContent:'space-between'}}>
-          <a href="/" style={{color:'white', textDecoration:'none', opacity:0.6, fontSize:'14px'}}>← CHATS</a>
-          <span style={{fontSize:'11px', letterSpacing:'2.5px', fontWeight:'800'}}>LUMEN • {videos.length}</span>
-          <span onClick={openRecord} style={{background:'white', color:'black', padding:'6px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}>＋ Record</span>
+      {/* Header - Twitter */}
+      <div style={{position:'sticky', top:0, zIndex:20, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(12px)', padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid #222'}}>
+        <div style={{display:'flex', alignItems:'center', gap:'16px'}}>
+          <a href="/" style={{color:'white', textDecoration:'none', fontSize:'18px'}}>←</a>
+          <span style={{fontWeight:'800', fontSize:'18px', letterSpacing:'0.5px'}}>LUMEN</span>
         </div>
+        <span style={{fontSize:'11px', opacity:0.5}}>👁️ Live • Yaba</span>
+      </div>
 
-        <div style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'20px'}}>
-          <div style={{width:'220px', height:'380px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'20px', overflow:'hidden', position:'relative'}}>
-            {s?.url ? <video src={s.url} autoPlay loop muted playsInline style={{width:'100%', height:'100%', objectFit:'cover'}} /> : <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'48px'}}>{s?.pov ? '◍ POV' : '◎ SELF'}</div>}
-            <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'12px', background:'linear-gradient(0deg, rgba(0,0,0,0.8), transparent)'}}>
-              <p style={{margin:0, fontWeight:'700', fontSize:'13px'}}>{s?.name} • {s?.feeling}</p>
-              <p style={{margin:'4px 0 0', fontSize:'11px', opacity:0.7}}>👁️ {s?.views} • ❤️ {s?.likes} • 💬 {s?.comments}</p>
+      {/* Composer - Twitter */}
+      <div style={{padding:'12px 16px', borderBottom:'1px solid #222', display:'flex', gap:'12px'}}>
+        <div style={{width:'40px', height:'40px', borderRadius:'50%', background:'#333', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'700', flexShrink:0}}>Y</div>
+        <div style={{flex:1}}>
+          <div onClick={()=>setShowComposer(true)} style={{background:'#111', border:'1px solid #222', borderRadius:'20px', padding:'12px 16px', color: newText ? 'white' : '#666', cursor:'text', minHeight:'44px'}}>
+            {newText || "What's your feeling? Share your POV..."}
+          </div>
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'10px'}}>
+            <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+              <span onClick={()=>fileRef.current?.click()} style={{color:'#1DA1F2', cursor:'pointer', fontSize:'18px'}}>🖼️</span>
+              <span onClick={()=>fileRef.current?.click()} style={{color:'#1DA1F2', cursor:'pointer', fontSize:'18px'}}>🎥</span>
+              <div style={{display:'flex', gap:'6px'}}>
+                {['Soft','Focus','Calm','Raw'].map(f=>(
+                  <span key={f} onClick={()=>setFeeling(f)} style={{fontSize:'11px', padding:'4px 8px', borderRadius:'12px', background: feeling===f ? 'white' : '#111', color: feeling===f ? 'black' : '#666', border:'1px solid #222', cursor:'pointer', fontWeight:'600'}}>{f}</span>
+                ))}
+              </div>
+            </div>
+            <span style={{fontSize:'11px', opacity:0.4}}>{newText.length}/280</span>
+          </div>
+        </div>
+      </div>
+      <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={onFile} />
+
+      {/* Full Composer Modal */}
+      {showComposer && (
+        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', zIndex:50, padding:'16px'}}>
+          <div style={{background:'black', border:'1px solid #222', borderRadius:'16px', padding:'16px', maxWidth:'600px', margin:'0 auto'}}>
+            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'12px'}}>
+              <span onClick={()=>setShowComposer(false)} style={{color:'#1DA1F2', cursor:'pointer'}}>Cancel</span>
+              <span style={{fontWeight:'700'}}>New LUMEN</span>
+              <span onClick={createPost} style={{background:'#1DA1F2', color:'white', padding:'6px 16px', borderRadius:'20px', fontWeight:'700', cursor:'pointer', opacity: (newText||preview) ? 1 : 0.5}}>Post</span>
+            </div>
+            <textarea value={newText} onChange={e=>setNewText(e.target.value)} placeholder="Share your POV... wetin you see, wetin you feel?" autoFocus style={{width:'100%', minHeight:'120px', background:'transparent', border:'none', color:'white', fontSize:'18px', outline:'none', resize:'none'}} maxLength={280} />
+            {preview && <div style={{marginTop:'12px', position:'relative'}}><img src={preview} style={{width:'100%', borderRadius:'16px', maxHeight:'300px', objectFit:'cover'}} alt="" /><span onClick={()=>setPreview('')} style={{position:'absolute', top:'8px', right:'8px', background:'black', width:'28px', height:'28px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer'}}>✕</span></div>}
+            <div style={{marginTop:'12px', display:'flex', gap:'8px', paddingTop:'12px', borderTop:'1px solid #222'}}>
+              <span onClick={()=>fileRef.current?.click()} style={{background:'#111', border:'1px solid #222', padding:'8px 12px', borderRadius:'20px', fontSize:'13px', cursor:'pointer'}}>🖼️ Photo</span>
+              <span onClick={()=>fileRef.current?.click()} style={{background:'#111', border:'1px solid #222', padding:'8px 12px', borderRadius:'20px', fontSize:'13px', cursor:'pointer'}}>🎥 Video</span>
+              <span style={{marginLeft:'auto', fontSize:'12px', opacity:0.5, display:'flex', alignItems:'center', gap:'6px'}}><span style={{width:'6px', height:'6px', background:'#1DA1F2', borderRadius:'50%'}}></span> {feeling} • POV</span>
             </div>
           </div>
+        </div>
+      )}
 
-          <div style={{marginTop:'20px', display:'flex', gap:'8px'}}>
-            {videos.map((_,i)=><div key={i} onClick={()=>setActive(i)} style={{width: active===i ? '24px' : '6px', height:'6px', background: active===i ? 'white' : 'rgba(255,255,255,0.2)', borderRadius:'3px', cursor:'pointer'}}></div>)}
+      {/* Feed - Twitter */}
+      <div>
+        {posts.map(p=>(
+          <div key={p.id} style={{padding:'12px 16px', borderBottom:'1px solid #222', display:'flex', gap:'12px'}}>
+            <div style={{width:'40px', height:'40px', borderRadius:'50%', background:p.handle==='you' ? '#1DA1F2' : '#333', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'700', flexShrink:0}}>{p.name[0]}</div>
+            <div style={{flex:1, minWidth:0}}>
+              <div style={{display:'flex', gap:'6px', alignItems:'center', flexWrap:'wrap'}}>
+                <span style={{fontWeight:'700', fontSize:'15px'}}>{p.name}</span>
+                <span style={{color:'#666', fontSize:'14px'}}>@{p.handle}</span>
+                <span style={{color:'#666', fontSize:'14px'}}>· {p.time}</span>
+                <span style={{background:`${p.feeling==='Soft' ? '#FFD6E0' : p.feeling==='Focus' ? '#C4D9FF' : '#D6FFD6'}20`, color:p.feeling==='Soft' ? '#FF8FAB' : p.feeling==='Focus' ? '#6FA0FF' : '#7CFF7C', padding:'2px 8px', borderRadius:'10px', fontSize:'10px', fontWeight:'700'}}>{p.feeling}</span>
+              </div>
+
+              <p style={{margin:'6px 0 0', fontSize:'15px', lineHeight:'1.4', whiteSpace:'pre-wrap', wordBreak:'break-word'}}>{p.text}</p>
+
+              {p.image && <img src={p.image} style={{marginTop:'10px', width:'100%', borderRadius:'16px', border:'1px solid #222', maxHeight:'400px', objectFit:'cover'}} alt="" />}
+              {p.video && <video src={p.video} controls style={{marginTop:'10px', width:'100%', borderRadius:'16px', border:'1px solid #222'}} />}
+
+              {/* Actions - Twitter */}
+              <div style={{display:'flex', justifyContent:'space-between', marginTop:'10px', maxWidth:'90%'}}>
+                <span style={{display:'flex', alignItems:'center', gap:'6px', color:'#666', fontSize:'13px', cursor:'pointer'}}>
+                  <span>💬</span> {p.comments}
+                </span>
+                <span onClick={()=>like(p.id)} style={{display:'flex', alignItems:'center', gap:'6px', color: p.liked ? '#F91880' : '#666', fontSize:'13px', cursor:'pointer'}}>
+                  <span>{p.liked ? '❤️' : '🤍'}</span> {p.likes}
+                </span>
+                <span style={{display:'flex', alignItems:'center', gap:'6px', color:'#666', fontSize:'13px'}}>
+                  <span>👁️</span> {p.views.toLocaleString()}
+                </span>
+                <span style={{color:'#666', fontSize:'13px', cursor:'pointer'}}>↗️</span>
+                <span onClick={()=>setDmOpen(p)} style={{background:'#1DA1F2', color:'white', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'700', cursor:'pointer'}}>DM</span>
+              </div>
+            </div>
           </div>
-
-          <p style={{marginTop:'16px', fontSize:'13px', opacity:0.5, textAlign:'center'}}>Tap + Record to add your LUMEN<br/>5 sec • POV (back cam) or Selfie (front cam)</p>
-        </div>
-
-        <div style={{padding:'16px 20px'}}>
-          <div onClick={openRecord} style={{background:'white', color:'black', padding:'16px', borderRadius:'14px', textAlign:'center', fontWeight:'700', cursor:'pointer'}}>📹 Record LUMEN • 5 sec POV</div>
-        </div>
-      </div>
-    )
-  }
-
-  // RECORD MODE
-  return(
-    <div style={{height:'100vh', background:'black', position:'relative', overflow:'hidden', fontFamily:'system-ui'}}>
-      <video ref={videoRef} autoPlay muted playsInline style={{width:'100%', height:'100%', objectFit:'cover', transform: facing==='user' ? 'scaleX(-1)' : 'none'}}></video>
-
-      {/* Top */}
-      <div style={{position:'absolute', top:0, left:0, right:0, padding:'16px', display:'flex', justifyContent:'space-between', zIndex:10, background:'linear-gradient(180deg, rgba(0,0,0,0.6), transparent)'}}>
-        <span onClick={()=>{stopCamera(); setMode('view')}} style={{color:'white', fontSize:'14px', cursor:'pointer'}}>✕ Cancel</span>
-        <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-          {recording && <div style={{width:'8px', height:'8px', background:'red', borderRadius:'50%', animation:'blink 1s infinite'}}></div>}
-          <span style={{color:'white', fontWeight:'700', fontSize:'14px'}}>{recording ? `0:0${seconds} / 0:05` : 'LUMEN'}</span>
-        </div>
-        <span onClick={switchCamera} style={{color:'white', fontSize:'20px', cursor:'pointer'}}>🔄</span>
-      </div>
-
-      {/* Feeling Selector */}
-      <div style={{position:'absolute', top:'60px', left:0, right:0, display:'flex', justifyContent:'center', gap:'8px', zIndex:10}}>
-        {['Soft','Focus','Calm','Raw'].map(f=>(
-          <span key={f} onClick={()=>setFeeling(f)} style={{background: feeling===f ? 'white' : 'rgba(0,0,0,0.4)', color: feeling===f ? 'black' : 'white', padding:'6px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'700', cursor:'pointer', backdropFilter:'blur(10px)'}}>{f}</span>
         ))}
       </div>
 
-      {/* Bottom */}
-      <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', gap:'12px', zIndex:10, background:'linear-gradient(0deg, rgba(0,0,0,0.8), transparent)'}}>
-        <p style={{margin:0, color:'white', fontSize:'11px', letterSpacing:'1px', opacity:0.7}}>{facing==='environment' ? 'POV • BACK CAMERA • Show wetin you see' : 'SELFIE • FRONT CAMERA • Show you'}</p>
-        
-        <div style={{display:'flex', alignItems:'center', gap:'20px'}}>
-          <div onClick={switchCamera} style={{width:'48px', height:'48px', background:'rgba(255,255,255,0.15)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', cursor:'pointer', backdropFilter:'blur(10px)'}}>🔄</div>
-          
-          <div onClick={recording ? stopRecord : startRecord} style={{
-            width:'80px', height:'80px', borderRadius:'50%',
-            background: recording ? 'red' : 'white',
-            border:'4px solid rgba(255,255,255,0.3)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            cursor:'pointer', transition:'all 0.2s',
-            boxShadow: recording ? '0 0 30px red' : '0 0 20px rgba(255,255,255,0.3)'
-          }}>
-            <div style={{width: recording ? '28px' : '60px', height: recording ? '28px' : '60px', background: recording ? 'white' : 'red', borderRadius: recording ? '4px' : '50%', transition:'all 0.2s'}}></div>
+      {/* DM Modal */}
+      {dmOpen && (
+        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:60, display:'flex', alignItems:'flex-end', justifyContent:'center'}}>
+          <div style={{background:'#16181C', width:'100%', maxWidth:'600px', borderRadius:'20px 20px 0 0', borderTop:'1px solid #222', padding:'16px', maxHeight:'70vh', display:'flex', flexDirection:'column'}}>
+            <div style={{width:'36px', height:'4px', background:'#333', borderRadius:'2px', margin:'0 auto 16px'}}></div>
+            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
+              <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+                <div style={{width:'36px', height:'36px', borderRadius:'50%', background:'#333', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'700'}}>{dmOpen.name[0]}</div>
+                <div>
+                  <p style={{margin:0, fontWeight:'700', fontSize:'14px'}}>{dmOpen.name} • @{dmOpen.handle}</p>
+                  <p style={{margin:0, fontSize:'12px', opacity:0.5}}>DM from LUMEN</p>
+                </div>
+              </div>
+              <span onClick={()=>setDmOpen(null)} style={{opacity:0.5, cursor:'pointer'}}>✕</span>
+            </div>
+            <div style={{background:'#000', border:'1px solid #222', borderRadius:'12px', padding:'12px', marginBottom:'12px'}}>
+              <p style={{margin:0, fontSize:'13px', opacity:0.6}}>Replying to:</p>
+              <p style={{margin:'4px 0 0', fontSize:'14px'}}>"{dmOpen.text.slice(0,100)}"</p>
+            </div>
+            <div style={{display:'flex', gap:'8px'}}>
+              <input value={dmText} onChange={e=>setDmText(e.target.value)} placeholder={`Message @${dmOpen.handle}...`} autoFocus style={{flex:1, background:'#000', border:'1px solid #222', borderRadius:'20px', padding:'12px 16px', color:'white', outline:'none'}} />
+              <div onClick={sendDM} style={{background:'#1DA1F2', color:'white', padding:'12px 20px', borderRadius:'20px', fontWeight:'700', cursor:'pointer'}}>Send</div>
+            </div>
+            <p style={{margin:'10px 0 0', fontSize:'11px', opacity:0.4, textAlign:'center'}}>DM go enter for Chats page • End-to-end vibe</p>
           </div>
-
-          <div style={{width:'48px', height:'48px', background:'rgba(255,255,255,0.15)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', fontWeight:'700', color:'white', cursor:'pointer'}}>5s</div>
         </div>
+      )}
 
-        <p style={{margin:0, color:'white', fontSize:'11px', opacity:0.5}}>{recording ? 'Recording... tap to stop' : 'Tap red to record • 5 sec max'}</p>
-      </div>
+      {/* Floating Post Button - Twitter */}
+      <div onClick={()=>setShowComposer(true)} style={{position:'fixed', bottom:'20px', right:'20px', width:'56px', height:'56px', background:'#1DA1F2', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'28px', fontWeight:'700', cursor:'pointer', boxShadow:'0 4px 12px rgba(29,161,242,0.4)', zIndex:30}}>+</div>
 
-      <style>{`@keyframes blink{0%,100%{opacity:1} 50%{opacity:0}}`}</style>
     </div>
   )
-                   }
+          }

@@ -1,70 +1,53 @@
 "use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
-import { WHATSAPP_DISPLAY } from "../src/lib/products";
-
-const links = [
-  { name: "Home", href: "/" },
-  { name: "Shop", href: "/shop" },
-  { name: "Collections", href: "/collections" },
-  { name: "About", href: "/about" },
-];
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-
   return (
-    <header className="sticky top-0 z-50 bg-luxe-black/95 backdrop-blur border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-5 h-[64px] flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-luxe-gold flex items-center justify-center font-serif font-bold text-luxe-black text-[18px]">T</div>
-          <div className="leading-none">
-            <p className="font-serif font-bold text-[17px]">Thrifty <span className="text-luxe-gold">Luxe</span></p>
-            <p className="text-[9px] tracking-[0.2em] text-white/50 uppercase">My Crib • Your Wardrobe</p>
-          </div>
+    <header className="sticky top-0 z-50 bg-[#050505]/90 backdrop-blur-xl border-b border-[#C9A227]/25 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+      {/* Gold streaming line */}
+      <div className="h-[2px] bg-gradient-to-r from-transparent via-[#F5D67B] via-[#C9A227] to-transparent bg-[length:200%_100%] animate-[shine_3s_linear_infinite]" />
+
+      <div className="max-w-7xl mx-auto px-5 h-[76px] flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3 group">
+          <img
+            src="/logo.png"
+            alt="Thrifty Luxe"
+            className="w-[52px] h-[52px] rounded-full object-cover border-2 border-[#C9A227]/60 shadow-[0_0_20px_rgba(201,162,39,0.4)] group-hover:shadow-[0_0_30px_rgba(201,162,39,0.7)] transition-all"
+          />
+          <span className="leading-none">
+            <span className="block font-serif font-bold text-[21px] tracking-wide">
+              Thrifty <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#F5D67B] bg-[length:200%_auto] animate-[shine_3s_linear_infinite]">Luxe</span>
+            </span>
+            <span className="block text-[9px] tracking-[0.32em] text-[#C9A227] font-bold mt-1.5">MY CRIB • YOUR WARDROBE</span>
+          </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-7">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className={`text-[14px] font-medium ${pathname === l.href ? "text-luxe-gold" : "text-white/70 hover:text-white"}`}>
-              {l.name}
-            </Link>
-          ))}
+        <nav className="hidden md:flex gap-8 text-[14px] text-white/70">
+          <Link href="/" className="hover:text-[#F5D67B]">Home</Link>
+          <Link href="/shop" className="hover:text-[#F5D67B]">Shop</Link>
+          <Link href="/collections" className="hover:text-[#F5D67B]">Collections</Link>
+          <Link href="/about" className="hover:text-[#F5D67B]">About</Link>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Link href="/shop" className="hidden sm:flex w-10 h-10 rounded-full bg-white/5 items-center justify-center hover:bg-white/10">
-            <Search size={18} />
-          </Link>
-          <a href={`https://wa.me/2347054802289?text=Hi%20Thrifty%20Luxe!`} target="_blank" rel="noopener noreferrer" className="hidden md:block bg-luxe-gold text-luxe-black text-[13px] font-bold px-4 py-2.5 rounded-full">
-            Order Now
-          </a>
-          <button onClick={() => setOpen(!open)} className="md:hidden w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
+        <div className="flex items-center gap-3">
+          <Link href="/shop" className="hidden md:block bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#A8861D] text-black text-[13px] font-bold px-6 py-3 rounded-full shadow-[0_10px_30px_rgba(201,162,39,0.4)] hover:scale-[1.03] transition">Shop Now →</Link>
+          <button onClick={() => setOpen(!open)} className="md:hidden w-[44px] h-[44px] bg-white/5 border border-[#C9A227]/30 rounded-full flex items-center justify-center">{open ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden border-t border-white/10 px-5 py-4 bg-luxe-black">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`block py-3 text-[15px] font-medium border-b border-white/5 last:border-0 ${pathname === l.href ? "text-luxe-gold" : "text-white/80"}`}>
-              {l.name}
-            </Link>
-          ))}
-          <div className="pt-3">
-            <p className="text-[12px] text-white/50">WhatsApp: {WHATSAPP_DISPLAY}</p>
-            <a href="https://wa.me/2347054802289?text=Hi%20Thrifty%20Luxe!%20I%20want%20to%20order" target="_blank" rel="noopener noreferrer" className="btn-gold block text-center mt-3">Order on WhatsApp</a>
-          </div>
+        <div className="md:hidden px-5 pb-5 flex flex-col text-[15px] bg-[#050505] border-t border-white/5">
+          <Link href="/" onClick={()=>setOpen(false)} className="py-3.5 border-b border-white/5">Home</Link>
+          <Link href="/shop" onClick={()=>setOpen(false)} className="py-3.5 border-b border-white/5">Shop</Link>
+          <Link href="/collections" onClick={()=>setOpen(false)} className="py-3.5 border-b border-white/5">Collections</Link>
+          <Link href="/about" onClick={()=>setOpen(false)} className="py-3.5">About</Link>
         </div>
       )}
+
+      <style jsx>{`@keyframes shine { to { background-position: 200% center; } }`}</style>
     </header>
   );
 }

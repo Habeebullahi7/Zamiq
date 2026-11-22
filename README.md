@@ -1,1 +1,1 @@
-# Zamiq
+# Thrifty-Luxe

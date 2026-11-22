@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X, Search } from "lucide-react";
-import { WHATSAPP_DISPLAY } from "@/lib/products";
+import { WHATSAPP_DISPLAY } from "../src/lib/products";
 
 const links = [
   { name: "Home", href: "/" },

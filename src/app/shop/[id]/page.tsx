@@ -1,26 +1,50 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Truck, ShieldCheck, MapPin } from "lucide-react";
-import { products, formatNaira, whatsappLink } from "../../../lib/products";
+import { supabase, DbProduct } from "../../../lib/supabase";
+import { formatNaira, whatsappLink } from "../../../lib/products";
 
 export default function ProductDetail() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const product = products.find((p) => String(p.id) === id);
+  const [product, setProduct] = useState<DbProduct | null>(null);
+  const [related, setRelated] = useState<DbProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const { data } = await supabase.from("products").select("*").eq("id", Number(id)).single();
+      if (data) {
+        setProduct(data);
+        const { data: rel } = await supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(4);
+        if (rel) setRelated(rel);
+      }
+      setLoading(false);
+    };
+    if (id) fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-luxe-black flex items-center justify-center">
+        <p className="text-white/60">Loading product... ✨</p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
       <div className="min-h-screen bg-luxe-black flex flex-col items-center justify-center px-5 text-center">
         <p className="text-[50px]">😢</p>
         <p className="font-bold text-[20px] mt-2">Item not found</p>
+        <p className="text-white/50 text-[13px] mt-1">This item don sell or e no dey again</p>
         <Link href="/shop" className="btn-gold mt-5">Back to Shop</Link>
       </div>
     );
   }
-
-  const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
 
   return (
     <div className="bg-luxe-black min-h-screen px-5 max-w-7xl mx-auto py-6">
@@ -32,6 +56,7 @@ export default function ProductDetail() {
         <div className="aspect-square bg-luxe-coal border border-white/10 rounded-[20px] flex items-center justify-center relative">
           <span className="text-[90px]">🛍️</span>
           {product.tag && <span className="absolute top-4 left-4 bg-luxe-gold text-luxe-black text-[11px] font-bold px-3 py-1.5 rounded-full">{product.tag}</span>}
+          {!product.in_stock && <span className="absolute top-4 right-4 bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">SOLD OUT</span>}
         </div>
 
         <div>
@@ -39,13 +64,13 @@ export default function ProductDetail() {
           <h1 className="text-[26px] md:text-[32px] font-serif font-bold leading-tight mt-2">{product.name}</h1>
           <div className="flex items-center gap-2 mt-3">
             <span className="font-bold text-luxe-gold text-[24px]">{formatNaira(product.price)}</span>
-            {product.oldPrice && <span className="text-white/40 line-through">{formatNaira(product.oldPrice)}</span>}
+            {product.old_price && <span className="text-white/40 line-through">{formatNaira(product.old_price)}</span>}
           </div>
 
           <div className="mt-5 space-y-2 text-[14px]">
             <p><span className="text-white/50">Size:</span> <span className="font-semibold">{product.size}</span></p>
             <p><span className="text-white/50">Condition:</span> <span className="font-semibold">Thrift • Washed & Steamed</span></p>
-            <p><span className="text-white/50">Availability:</span> {product.inStock ? <span className="text-green-400 font-semibold">In Stock ✅</span> : <span className="text-red-400 font-semibold">Sold Out</span>}</p>
+            <p><span className="text-white/50">Availability:</span> {product.in_stock ? <span className="text-green-400 font-semibold">In Stock ✅</span> : <span className="text-red-400 font-semibold">Sold Out</span>}</p>
           </div>
 
           <p className="text-white/60 text-[14px] leading-relaxed mt-4">
@@ -82,4 +107,4 @@ export default function ProductDetail() {
       )}
     </div>
   );
-      }
+}

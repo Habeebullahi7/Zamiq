@@ -1,119 +1,150 @@
-// WhatsApp - single source of truth
-export const WHATSAPP_NUMBER = "2347054802289";
-export const WHATSAPP_DISPLAY = "+234 705 480 2289";
-
-export function whatsappLink(message: string) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-}
-
-// Types
 export type Product = {
   id: number;
   name: string;
   price: number;
   oldPrice?: number;
-  category: "dresses" | "jackets" | "bags" | "shoes" | "tops" | "trousers";
+  category: string;
   size: string;
-  condition: "Like New" | "Excellent" | "Very Good";
-  tag?: "Best Seller" | "New" | "Hot" | "Limited";
-  img: string;
-  description: string;
+  tag?: string;
+  inStock: boolean;
+  description?: string;
+  image?: string;
 };
 
-// Products - replace img with real photos later
+export const WHATSAPP_NUMBER = "2347054802289";
+export const WHATSAPP_DISPLAY = "+234 705 480 2289";
+
+export function formatNaira(amount: number) {
+  return "₦" + amount.toLocaleString("en-NG");
+}
+
+export function whatsappLink(message: string) {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
 export const products: Product[] = [
   {
     id: 1,
-    name: "Vintage Denim Jacket",
-    price: 15000,
-    oldPrice: 25000,
-    category: "jackets",
-    size: "M / UK 10",
-    condition: "Excellent",
-    tag: "Best Seller",
-    img: "/products/jacket.jpg",
-    description: "Thick quality denim, vintage wash. Perfect for layering.",
+    name: "Vintage Denim Jacket - Light Wash",
+    price: 8500,
+    oldPrice: 12000,
+    category: "Jackets",
+    size: "M",
+    tag: "HOT",
+    inStock: true,
+    description: "Clean vintage denim jacket, light wash. Washed, steamed and ready to wear. Perfect for layering.",
   },
   {
     id: 2,
-    name: "Luxury Silk Dress",
-    price: 12000,
-    oldPrice: 20000,
-    category: "dresses",
-    size: "S / UK 8",
-    condition: "Like New",
-    tag: "New",
-    img: "/products/dress.jpg",
-    description: "Silky flow, elegant fit. For dinner, church, owambe.",
+    name: "Silk Satin Slip Dress - Champagne",
+    price: 9500,
+    oldPrice: 14000,
+    category: "Dresses",
+    size: "S",
+    tag: "NEW",
+    inStock: true,
+    description: "Elegant satin slip dress. Soft, flowy and perfect for dinner or party.",
   },
   {
     id: 3,
-    name: "Retro Leather Bag",
-    price: 18000,
-    oldPrice: 30000,
-    category: "bags",
-    size: "Medium",
-    condition: "Excellent",
-    tag: "Hot",
-    img: "/products/bag.jpg",
-    description: "Genuine leather, clean interior. Carries all your essentials.",
+    name: "Oversized Graphic Tee - Black",
+    price: 4500,
+    oldPrice: 7000,
+    category: "Tops",
+    size: "L",
+    tag: "BESTSELLER",
+    inStock: true,
+    description: "Oversized streetwear tee, soft cotton. Very clean, no fade.",
   },
   {
     id: 4,
-    name: "Designer Sneakers",
-    price: 22000,
-    oldPrice: 35000,
-    category: "shoes",
-    size: "EU 40",
-    condition: "Very Good",
-    tag: "Limited",
-    img: "/products/sneakers.jpg",
-    description: "Clean sole, premium comfort. One pair left.",
+    name: "High-Waist Wide Leg Trousers - Cream",
+    price: 7000,
+    oldPrice: 10000,
+    category: "Bottoms",
+    size: "M",
+    inStock: true,
+    description: "High-waist wide leg trousers. Classy fit, goes with anything.",
   },
   {
     id: 5,
-    name: "Pleated Midi Skirt",
-    price: 9000,
-    oldPrice: 15000,
-    category: "dresses",
-    size: "M / UK 10",
-    condition: "Like New",
-    img: "/products/skirt.jpg",
-    description: "Flowy pleats, easy to style with top or blazer.",
+    name: "Mini Leather Handbag - Brown",
+    price: 11000,
+    oldPrice: 16000,
+    category: "Bags",
+    size: "One Size",
+    tag: "LUXE",
+    inStock: true,
+    description: "Mini leather handbag, premium feel. Clean inside and out.",
   },
   {
     id: 6,
-    name: "Oversized Blazer",
-    price: 16000,
-    oldPrice: 28000,
-    category: "jackets",
-    size: "L / UK 12",
-    condition: "Excellent",
-    tag: "New",
-    img: "/products/blazer.jpg",
-    description: "Sharp fit, office to owambe. Instant luxury look.",
+    name: "Chunky Sneakers - White / Beige",
+    price: 14500,
+    oldPrice: 20000,
+    category: "Shoes",
+    size: "40",
+    tag: "HOT",
+    inStock: true,
+    description: "Chunky sneakers, very clean sole. Comfortable for everyday wear.",
+  },
+  {
+    id: 7,
+    name: "Pleated Midi Skirt - Black",
+    price: 6000,
+    category: "Bottoms",
+    size: "S",
+    inStock: true,
+    description: "Pleated midi skirt, flowy and elegant.",
+  },
+  {
+    id: 8,
+    name: "Cropped Cardigan - Pink",
+    price: 5500,
+    oldPrice: 8000,
+    category: "Tops",
+    size: "M",
+    inStock: false,
+    description: "Soft cropped cardigan. This one don sell, but we fit source similar for you.",
+  },
+  {
+    id: 9,
+    name: "Floral Summer Dress - Blue",
+    price: 7500,
+    category: "Dresses",
+    size: "M",
+    tag: "NEW",
+    inStock: true,
+    description: "Floral summer dress, light and breezy. Perfect for Lagos sun.",
+  },
+  {
+    id: 10,
+    name: "Leather Biker Jacket - Black",
+    price: 15000,
+    oldPrice: 22000,
+    category: "Jackets",
+    size: "L",
+    tag: "RARE",
+    inStock: true,
+    description: "Rare leather biker jacket. Heavy quality, clean condition.",
+  },
+  {
+    id: 11,
+    name: "Tote Bag - Canvas Beige",
+    price: 6500,
+    category: "Bags",
+    size: "One Size",
+    inStock: true,
+    description: "Big canvas tote, perfect for school or market runs.",
+  },
+  {
+    id: 12,
+    name: "Heeled Ankle Boots - Black",
+    price: 13000,
+    oldPrice: 18000,
+    category: "Shoes",
+    size: "39",
+    inStock: true,
+    description: "Heeled ankle boots, clean and sturdy. Very classy.",
   },
 ];
-
-// Delivery fees - by location
-export const DELIVERY_FEES: Record<string, number> = {
-  "FUNAAB Campus": 500,
-  Abeokuta: 1000,
-  Lagos: 3000,
-  Ibadan: 2500,
-  Abuja: 4000,
-  "Port Harcourt": 4000,
-  "Other States": 3500,
-};
-
-export const CATEGORIES = [
-  { name: "All", value: "all" },
-  { name: "Dresses", value: "dresses" },
-  { name: "Jackets", value: "jackets" },
-  { name: "Bags", value: "bags" },
-  { name: "Shoes", value: "shoes" },
-] as const;
-
-export function formatNaira(amount: number) {
-  return `₦${amount.toLocaleString()}`;
-    }

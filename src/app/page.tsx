@@ -1,154 +1,179 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star, Truck, ShieldCheck, ArrowRight, Sparkles, MapPin } from "lucide-react";
-import { products, formatNaira, whatsappLink, WHATSAPP_DISPLAY } from "../lib/products";
+import { supabase, DbProduct } from "../lib/supabase";
+import { formatNaira, whatsappLink } from "../lib/products";
 
 export default function Home() {
-  const bestSellers = products.slice(0, 4);
+  const [products, setProducts] = useState<DbProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false }).limit(8);
+      if (data) setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
   return (
-    <div className="bg-luxe-black min-h-screen">
-      {/* HERO */}
-      <section className="px-5 max-w-7xl mx-auto pt-8 md:pt-14 pb-10">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+    <div className="bg-[#050505] min-h-screen text-white overflow-hidden">
+
+      {/* ===== HERO - LUXURY ===== */}
+      <div className="relative overflow-hidden text-center py-14 md:py-20 px-5">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#C9A227]/15 blur-[100px] rounded-full" />
+        <div className="absolute -left-20 top-40 w-[300px] h-[300px] bg-[#C9A227]/10 blur-[80px] rounded-full" />
+        <div className="absolute -right-20 bottom-0 w-[300px] h-[300px] bg-[#C9A227]/10 blur-[80px] rounded-full" />
+
+        <div className="relative">
+          <div className="relative inline-block">
+            <img src="/logo.png" alt="Thrifty Luxe" className="w-[170px] h-[170px] md:w-[210px] md:h-[210px] mx-auto rounded-full object-cover border-2 border-[#C9A227]/60 shadow-[0_0_70px_rgba(201,162,39,0.5)]" />
+            <span className="absolute -top-1 -right-1 w-[28px] h-[28px] bg-[#C9A227] rounded-full flex items-center justify-center text-[14px] shadow-lg">✦</span>
+          </div>
+
+          <p className="text-[#C9A227] text-[11px] tracking-[0.4em] font-bold mt-7">✦ LUXURY THRIFT BOUTIQUE ✦</p>
+
+          <h1 className="font-serif text-[42px] md:text-[66px] font-bold leading-[1.05] mt-3">
+            My Crib,<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#F5D67B] bg-[length:200%_auto] animate-[shine_3s_linear_infinite]">Your Wardrobe.</span>
+          </h1>
+
+          <p className="text-white/60 text-[15px] max-w-[480px] mx-auto mt-4 leading-relaxed">
+            Handpicked luxury thrift pieces. Washed, steamed, quality-checked. Look expensive, pay less. Once e go, e don go.
+          </p>
+
+          <div className="flex gap-3 justify-center mt-7 flex-wrap">
+            <Link href="/shop" className="bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#A8861D] text-black font-bold px-8 py-4 rounded-full text-[14px] shadow-[0_15px_40px_rgba(201,162,39,0.4)] hover:scale-[1.03] transition">Shop Collection →</Link>
+            <Link href="/collections" className="bg-white/5 border border-white/15 font-semibold px-8 py-4 rounded-full text-[14px] hover:bg-white/10 transition">View Lookbook</Link>
+          </div>
+
+          {/* ADMIN BUTTON - FOR YOU */}
+          <div className="mt-6">
+            <Link href="/admin" className="inline-flex items-center gap-2 text-[12px] text-white/40 hover:text-[#F5D67B] border border-white/10 hover:border-[#C9A227]/50 px-5 py-2.5 rounded-full transition-all bg-white/[0.02]">
+              🔐 <span className="tracking-[0.2em] font-semibold">ADMIN</span>
+            </Link>
+          </div>
+
+          {/* TRUST BADGES */}
+          <div className="flex justify-center gap-6 md:gap-10 mt-10 text-center">
+            <div><p className="font-serif font-bold text-[18px] text-[#F5D67B]">500+</p><p className="text-white/50 text-[11px]">Happy Customers</p></div>
+            <div><p className="font-serif font-bold text-[18px] text-[#F5D67B]">100%</p><p className="text-white/50 text-[11px]">Quality Checked</p></div>
+            <div><p className="font-serif font-bold text-[18px] text-[#F5D67B]">Nationwide</p><p className="text-white/50 text-[11px]">Fast Delivery</p></div>
+          </div>
+        </div>
+        <style jsx>{`@keyframes shine { to { background-position: 200% center; } }`}</style>
+      </div>
+
+      {/* ===== MARQUEE - STREAMING GOLD ===== */}
+      <div className="border-y border-[#C9A227]/20 bg-[#0A0A0A] py-3 overflow-hidden">
+        <div className="flex gap-8 whitespace-nowrap animate-[marquee_20s_linear_infinite] text-[12px] tracking-[0.25em] text-[#C9A227] font-bold">
+          <span>✦ NEW DROPS EVERY WEEK ✦</span><span>✦ WASHED & STEAMED ✦</span><span>✦ FUNAAB • ABEOKUTA ✦</span><span>✦ DELIVERY NATIONWIDE ✦</span><span>✦ NEW DROPS EVERY WEEK ✦</span><span>✦ WASHED & STEAMED ✦</span><span>✦ FUNAAB • ABEOKUTA ✦</span><span>✦ DELIVERY NATIONWIDE ✦</span>
+        </div>
+        <style jsx>{`@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+      </div>
+
+      {/* ===== CATEGORIES ===== */}
+      <div className="max-w-7xl mx-auto px-5 py-12">
+        <div className="flex items-end justify-between">
           <div>
-            <span className="inline-flex items-center gap-1.5 bg-luxe-gold/15 text-luxe-gold text-[11px] font-bold px-3 py-1.5 rounded-full">
-              <Sparkles size={12} /> NEW DROP EVERY FRIDAY
-            </span>
-            <h1 className="text-[38px] md:text-[56px] font-serif font-bold leading-[1.05] mt-4">
-              My Crib,<br />
-              <span className="text-gold-gradient">Your Wardrobe.</span>
-            </h1>
-            <p className="text-white/60 text-[15px] leading-relaxed mt-4 max-w-[420px]">
-              Handpicked thrift, washed & steamed. Look expensive, pay less.
-              From vintage denim to silk dresses — curated for you.
-            </p>
-
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Link href="/shop" className="btn-gold">Shop Now →</Link>
-              <Link href="/collections" className="btn-gold-outline">View Collections</Link>
-            </div>
-
-            <div className="flex items-center gap-4 mt-6 text-[12px] text-white/50">
-              <span className="flex items-center gap-1"><Star size={13} className="fill-luxe-gold text-luxe-gold" /> 4.9 • 500+ customers</span>
-              <span className="flex items-center gap-1"><MapPin size={13} /> FUNAAB, Abeokuta</span>
-            </div>
+            <p className="text-[#C9A227] text-[11px] tracking-[0.3em] font-bold">SHOP BY CATEGORY</p>
+            <h2 className="font-serif font-bold text-[28px] md:text-[34px] mt-1">Find Your Piece</h2>
           </div>
-
-          {/* Hero Card */}
-          <div className="relative">
-            <div className="bg-luxe-coal border border-luxe-gold/20 rounded-[24px] p-5 rotate-1">
-              <div className="aspect-square bg-luxe-charcoal rounded-[18px] flex items-center justify-center text-[80px]">🛍️</div>
-              <div className="flex items-center justify-between mt-4">
-                <div>
-                  <p className="font-semibold">This Week's Hottest Pick</p>
-                  <p className="text-[12px] text-white/50">Vintage Denim Jacket • M / UK 10</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-luxe-gold text-[18px]">{formatNaira(15000)}</p>
-                  <p className="text-[12px] text-white/40 line-through">{formatNaira(25000)}</p>
-                </div>
-              </div>
-              <a
-                href={whatsappLink("Hi Thrifty Luxe! I want the Vintage Denim Jacket - ₦15,000")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-center mt-4 bg-[#25D366] text-white font-bold py-3.5 rounded-full text-[14px]"
-              >
-                Order This on WhatsApp
-              </a>
-            </div>
-            <span className="absolute -top-3 -right-2 bg-luxe-gold text-luxe-black text-[11px] font-bold px-3 py-1.5 rounded-full -rotate-3">-40% OFF</span>
-          </div>
+          <Link href="/shop" className="text-[13px] text-[#C9A227] font-semibold hidden md:block">View All →</Link>
         </div>
-      </section>
 
-      {/* TRUST BAR */}
-      <section className="border-y border-white/10 bg-luxe-coal">
-        <div className="max-w-7xl mx-auto px-5 py-4 grid grid-cols-3 gap-2 text-center">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-1.5"><Truck size={16} className="text-luxe-gold" /><span className="text-[11px] md:text-[13px]">Nationwide Delivery</span></div>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-1.5"><ShieldCheck size={16} className="text-luxe-gold" /><span className="text-[11px] md:text-[13px]">Quality Checked</span></div>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-1.5"><span>💰</span><span className="text-[11px] md:text-[13px]">Pay on Delivery*</span></div>
-        </div>
-      </section>
-
-      {/* CATEGORIES */}
-      <section className="px-5 max-w-7xl mx-auto py-10">
-        <h2 className="text-[22px] md:text-[26px] font-serif font-bold">Shop by Category</h2>
-        <div className="grid grid-cols-4 gap-3 mt-5">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-6">
           {[
-            { name: "Dresses", emoji: "👗", href: "/shop" },
-            { name: "Jackets", emoji: "🧥", href: "/shop" },
-            { name: "Bags", emoji: "👜", href: "/shop" },
-            { name: "Shoes", emoji: "👟", href: "/shop" },
+            { name: "Dresses", emoji: "👗" },
+            { name: "Jackets", emoji: "🧥" },
+            { name: "Tops", emoji: "👚" },
+            { name: "Bottoms", emoji: "👖" },
+            { name: "Bags", emoji: "👜" },
+            { name: "Shoes", emoji: "👠" },
           ].map((c) => (
-            <Link key={c.name} href={c.href} className="bg-luxe-coal border border-white/10 rounded-2xl p-4 text-center hover:border-luxe-gold/40 transition">
-              <span className="text-[28px] md:text-[32px]">{c.emoji}</span>
-              <p className="text-[12px] md:text-[13px] font-medium mt-2">{c.name}</p>
+            <Link key={c.name} href="/shop" className="bg-white/[0.03] border border-white/10 hover:border-[#C9A227]/40 rounded-[20px] p-4 text-center transition group">
+              <span className="text-[32px] group-hover:scale-110 inline-block transition">{c.emoji}</span>
+              <p className="font-semibold text-[13px] mt-2">{c.name}</p>
+              <p className="text-white/40 text-[11px]">Shop Now →</p>
             </Link>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* BEST SELLERS */}
-      <section className="px-5 max-w-7xl mx-auto pb-10">
+      {/* ===== NEW ARRIVALS - LIVE FROM SUPABASE ===== */}
+      <div className="max-w-7xl mx-auto px-5 pb-6">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="text-[22px] md:text-[26px] font-serif font-bold">Best Sellers</h2>
-            <p className="text-white/50 text-[13px] mt-1">Most loved this week</p>
+            <p className="text-[#C9A227] text-[11px] tracking-[0.3em] font-bold">FRESH FROM THE CRIB</p>
+            <h2 className="font-serif font-bold text-[28px] md:text-[34px] mt-1">New Arrivals ✨</h2>
           </div>
-          <Link href="/shop" className="flex items-center gap-1 text-luxe-gold text-[13px] font-semibold">View All <ArrowRight size={14} /></Link>
+          <Link href="/shop" className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[13px] font-medium">See All</Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
-          {bestSellers.map((p) => (
-            <div key={p.id} className="product-card">
-              <Link href={`/shop/${p.id}`}>
-                <div className="relative aspect-square bg-luxe-charcoal flex items-center justify-center">
-                  <span className="text-[44px]">🛍️</span>
-                  {p.tag && <span className="absolute top-2 left-2 bg-luxe-gold text-luxe-black text-[10px] font-bold px-2 py-1 rounded-full">{p.tag}</span>}
+        {loading ? (
+          <p className="text-white/50 text-center py-10">Loading luxury pieces... ✨</p>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12 bg-white/[0.02] border border-dashed border-white/10 rounded-[24px] mt-6">
+            <p className="text-[40px]">👗</p>
+            <p className="font-serif font-bold mt-2">New drops coming soon</p>
+            <p className="text-white/50 text-[13px] mt-1">Add products from Admin to see them here</p>
+            <Link href="/admin" className="inline-block mt-4 bg-gradient-to-r from-[#F5D67B] to-[#C9A227] text-black font-bold px-6 py-3 rounded-full text-[13px]">Go to Admin →</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            {products.map((p) => (
+              <div key={p.id} className="bg-white/[0.03] border border-white/10 rounded-[20px] overflow-hidden hover:border-[#C9A227]/40 transition group">
+                <Link href={`/shop/${p.id}`}>
+                  <div className="relative aspect-square bg-[#111] flex items-center justify-center">
+                    <span className="text-[44px] group-hover:scale-110 transition">🛍️</span>
+                    {p.tag && <span className="absolute top-2 left-2 bg-[#C9A227] text-black text-[10px] font-bold px-2 py-1 rounded-full">{p.tag}</span>}
+                    {!p.in_stock && <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">SOLD</span>}
+                  </div>
+                </Link>
+                <div className="p-3">
+                  <Link href={`/shop/${p.id}`}><p className="text-[13px] font-medium line-clamp-2 min-h-[36px] hover:text-[#C9A227]">{p.name}</p></Link>
+                  <p className="text-[11px] text-white/50 mt-1">Size: {p.size} • {p.category}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="font-bold text-[#F5D67B]">{formatNaira(p.price)}</span>
+                    {p.old_price && <span className="text-[12px] text-white/40 line-through">{formatNaira(p.old_price)}</span>}
+                  </div>
+                  <a href={whatsappLink(`Hi Thrifty Luxe! I want to order: ${p.name} - Size ${p.size} - ${formatNaira(p.price)}`)} target="_blank" rel="noopener noreferrer" className="mt-3 block text-center bg-[#25D366] text-white text-[13px] font-semibold py-2.5 rounded-full">Order on WhatsApp</a>
                 </div>
-              </Link>
-              <div className="p-3">
-                <Link href={`/shop/${p.id}`}><p className="text-[13px] font-medium line-clamp-2 min-h-[36px] hover:text-luxe-gold">{p.name}</p></Link>
-                <p className="text-[11px] text-white/50 mt-1">Size: {p.size}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="font-bold text-luxe-gold">{formatNaira(p.price)}</span>
-                  {p.oldPrice && <span className="text-[12px] text-white/40 line-through">{formatNaira(p.oldPrice)}</span>}
-                </div>
-                <a href={whatsappLink(`Hi Thrifty Luxe! I want to order: ${p.name} - ${formatNaira(p.price)}`)} target="_blank" rel="noopener noreferrer" className="mt-3 block text-center bg-[#25D366] text-white text-[13px] font-semibold py-2.5 rounded-full">
-                  Order on WhatsApp
-                </a>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ===== WHY US ===== */}
+      <div className="max-w-7xl mx-auto px-5 py-12">
+        <div className="bg-gradient-to-br from-[#1A1508] via-[#0A0A0A] to-[#0A0A0A] border border-[#C9A227]/20 rounded-[28px] p-6 md:p-10">
+          <p className="text-[#C9A227] text-[11px] tracking-[0.3em] font-bold text-center">WHY THRIFTY LUXE?</p>
+          <h2 className="font-serif font-bold text-[26px] md:text-[32px] text-center mt-2">Luxury Wey No Go Break Your Pocket</h2>
+          <div className="grid md:grid-cols-3 gap-4 mt-8">
+            <div className="bg-[#050505]/60 border border-white/10 rounded-[20px] p-5 text-center">
+              <p className="text-[32px]">✨</p><p className="font-bold mt-2">Handpicked</p><p className="text-white/50 text-[13px] mt-1 leading-relaxed">Every piece na handpicked. No anyhow cloth. Only clean, quality, stylish pieces.</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="px-5 max-w-7xl mx-auto pb-10">
-        <div className="bg-luxe-coal border border-luxe-gold/20 rounded-[20px] p-6 md:p-8">
-          <h2 className="text-[20px] font-serif font-bold text-center">How to Order in 3 Steps</h2>
-          <div className="grid md:grid-cols-3 gap-5 mt-6 text-center">
-            <div><div className="w-10 h-10 mx-auto bg-luxe-gold text-luxe-black font-bold rounded-full flex items-center justify-center">1</div><p className="font-semibold text-[14px] mt-3">Pick Your Item</p><p className="text-white/50 text-[12px] mt-1">Browse shop, choose size & style you love</p></div>
-            <div><div className="w-10 h-10 mx-auto bg-luxe-gold text-luxe-black font-bold rounded-full flex items-center justify-center">2</div><p className="font-semibold text-[14px] mt-3">Chat on WhatsApp</p><p className="text-white/50 text-[12px] mt-1">Send us item + your location, we confirm</p></div>
-            <div><div className="w-10 h-10 mx-auto bg-luxe-gold text-luxe-black font-bold rounded-full flex items-center justify-center">3</div><p className="font-semibold text-[14px] mt-3">Receive & Slay</p><p className="text-white/50 text-[12px] mt-1">Pay on delivery (FUNAAB/Abeokuta) or transfer</p></div>
+            <div className="bg-[#050505]/60 border border-white/10 rounded-[20px] p-5 text-center">
+              <p className="text-[32px]">🧼</p><p className="font-bold mt-2">Washed & Steamed</p><p className="text-white/50 text-[13px] mt-1 leading-relaxed">We wash, steam and check every item before e reach your hand. Fresh like new.</p>
+            </div>
+            <div className="bg-[#050505]/60 border border-white/10 rounded-[20px] p-5 text-center">
+              <p className="text-[32px]">🚚</p><p className="font-bold mt-2">Fast Delivery</p><p className="text-white/50 text-[13px] mt-1 leading-relaxed">FUNAAB, Abeokuta same-day. Nationwide delivery. Order today, slay tomorrow.</p>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <a href={whatsappLink("Hi Thrifty Luxe! I want to shop")} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#25D366] text-white font-bold px-8 py-4 rounded-full text-[14px] shadow-lg">Chat on WhatsApp →</a>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* CTA */}
-      <section className="px-5 max-w-7xl mx-auto pb-12">
-        <div className="bg-gradient-to-br from-luxe-gold/20 to-luxe-gold/5 border border-luxe-gold/30 rounded-[20px] p-6 md:p-8 text-center">
-          <p className="font-serif font-bold text-[22px]">New Drop Every Friday 🔥</p>
-          <p className="text-white/60 text-[13px] mt-1">DM us now — best pieces go fast. First come, first serve.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-5">
-            <a href={whatsappLink("Hi Thrifty Luxe! Show me new drops")} target="_blank" rel="noopener noreferrer" className="btn-gold">Chat on WhatsApp — {WHATSAPP_DISPLAY}</a>
-            <Link href="/shop" className="btn-gold-outline">Browse Shop</Link>
-          </div>
-        </div>
-      </section>
+      {/* ===== ADMIN FOOTER LINK - DISCREET ===== */}
+      <div className="text-center pb-10 px-5">
+        <Link href="/admin" className="text-[11px] text-white/25 hover:text-[#C9A227] tracking-[0.3em] transition">🔐 ADMIN LOGIN</Link>
+      </div>
+
     </div>
   );
-      }
+              }

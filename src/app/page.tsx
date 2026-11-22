@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Star, Truck, ShieldCheck, ArrowRight, Sparkles, MapPin } from "lucide-react";
-import { products, formatNaira, whatsappLink, WHATSAPP_DISPLAY } from "@/lib/products";
+import { products, formatNaira, whatsappLink, WHATSAPP_DISPLAY } from "../lib/products";
 
 export default function Home() {
   const bestSellers = products.slice(0, 4);
@@ -151,4 +151,4 @@ export default function Home() {
       </section>
     </div>
   );
-            }
+      }

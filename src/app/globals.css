@@ -1,1 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+:root {
+  --luxe-black: #0A0A0A;
+  --luxe-gold: #D4AF37;
+  --luxe-gold-light: #F5D67B;
+  --luxe-cream: #FFF8E7;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--luxe-black);
+  color: #FFFFFF;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Headings - Luxury serif */
+h1, h2, h3, .font-luxe {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+/* Gold text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #F5D67B 0%, #D4AF37 45%, #A67C00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gold button - main CTA */
+.btn-gold {
+  background: linear-gradient(135deg, #F5D67B, #D4AF37);
+  color: #0A0A0A;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 14px 28px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+}
+
+.btn-gold:active {
+  transform: scale(0.97);
+}
+
+/* Outline gold button */
+.btn-gold-outline {
+  border: 1px solid #D4AF37;
+  color: #D4AF37;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 13px 26px;
+}
+
+/* Product card */
+.product-card {
+  background: #121212;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* WhatsApp floating button */
+.whatsapp-float {
+  position: fixed;
+  bottom: 88px;
+  right: 16px;
+  z-index: 50;
+  background: #25D366;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+}

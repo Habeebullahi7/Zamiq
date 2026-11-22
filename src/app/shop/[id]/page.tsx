@@ -7,7 +7,8 @@ import { products, formatNaira, whatsappLink } from "../../../lib/products";
 
 export default function ProductDetail() {
   const params = useParams();
-  const product = products.find((p) => p.id === params.id);
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const product = products.find((p) => String(p.id) === id);
 
   if (!product) {
     return (
@@ -81,4 +82,4 @@ export default function ProductDetail() {
       )}
     </div>
   );
-}
+      }

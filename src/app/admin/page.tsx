@@ -255,7 +255,7 @@ export default function Admin() {
           {list.map((p) => (
             <div key={p.id} className="bg-white/[0.03] border border-white/10 rounded-[22px] p-4 flex gap-4 hover:border-[#C9A227]/30 transition group">
               <div className="w-[72px] h-[72px] shrink-0 rounded-2xl overflow-hidden bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-[32px]">
-                {(p as any).images?.[0] ? <img src={(p as any).images[0]} className="w-full h-full object-cover" /> : "🛍️"}
+                {(p any).images?.[0] ? <img src={(p any).images[0]} className="w-full h-full object-cover" /> : "🛍️"}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
@@ -264,7 +264,7 @@ export default function Admin() {
                 </div>
                 <p className="text-white/50 text-[12px] mt-1">{p.category} • Size {p.size}</p>
                 <p className="font-bold text-[#F5D67B] mt-1.5">{formatNaira(p.price)} {p.old_price && <span className="text-white/35 line-through text-[12px] font-normal ml-1">{formatNaira(p.old_price)}</span>}</p>
-                {(p as any).video_url && <p className="text-[11px] text-purple-300 mt-1">🎥 Video attached</p>}
+                {(p any).video_url && <p className="text-[11px] text-purple-300 mt-1">🎥 Video attached</p>}
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => toggleStock(p)} className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${p.in_stock ? "bg-green-500/15 text-green-400 border border-green-500/20" : "bg-red-500/15 text-red-400 border border-red-500/20"}`}>{p.in_stock ? "● In Stock" : "○ Sold Out"}</button>
                   <button onClick={() => deleteProduct(p.id)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Delete</button>

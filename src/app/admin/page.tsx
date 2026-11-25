@@ -21,7 +21,6 @@ export default function Admin() {
   const [inStock, setInStock] = useState(true);
   const [description, setDescription] = useState("");
 
-  // --- NEW: PICTURES + VIDEO ---
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -37,40 +36,11 @@ export default function Admin() {
   const inputClass = "w-full bg-[#0A0A0A] border border-white/10 rounded-2xl px-5 py-3.5 text-[14px] outline-none placeholder:text-white/30 focus:border-[#C9A227]/60 focus:ring-2 focus:ring-[#C9A227]/20 transition-all";
   const labelClass = "text-[11px] font-bold tracking-[0.15em] uppercase text-[#C9A227] mb-1.5 block";
 
-  // LUXURY LOGIN
-  if (!authed) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center px-5 relative overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-[#C9A227]/10 rounded-full blur-[100px]" />
-        <div className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-[#C9A227]/10 rounded-full blur-[100px]" />
-        <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[28px] p-8 w-full max-w-[420px] text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-          <div className="w-[70px] h-[70px] mx-auto rounded-full bg-gradient-to-br from-[#F5D67B] via-[#C9A227] to-[#8A6D1B] flex items-center justify-center text-[30px] shadow-lg shadow-[#C9A227]/30">👑</div>
-          <p className="text-[#C9A227] text-[11px] tracking-[0.3em] font-bold mt-5">THRIFTY LUXE</p>
-          <h1 className="font-serif font-bold text-[28px] mt-1 leading-tight">Welcome Back,<br/>Boss Lady ✨</h1>
-          <p className="text-white/50 text-[13px] mt-2">Manage your boutique with elegance</p>
-          <input
-            type="password"
-            value={passInput}
-            onChange={(e) => setPassInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && passInput === ADMIN_PASSWORD) setAuthed(true); }}
-            placeholder="Enter your secret password"
-            className="w-full mt-7 bg-[#0A0A0A] border border-white/10 rounded-full px-5 py-4 text-[14px] text-center outline-none focus:border-[#C9A227]/60 placeholder:text-white/30"
-          />
-          <button onClick={() => passInput === ADMIN_PASSWORD ? setAuthed(true) : alert("Wrong password!")} className="w-full mt-3 bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#A8861D] text-black font-bold py-4 rounded-full shadow-lg shadow-[#C9A227]/30 active:scale-[0.98] transition">
-            Unlock Dashboard →
-          </button>
-          <p className="text-white/25 text-[11px] mt-4">Secured • Private • Only for you</p>
-        </div>
-      </div>
-    );
-  }
-
   const addProduct = async () => {
     if (!name || !price || !size) return alert("Fill Name, Price and Size");
     if (images.length === 0) return alert("Add at least 1 picture!");
     setLoading(true);
     try {
-      // 1. Upload pictures
       const imageUrls: string[] = [];
       for (let i = 0; i < images.length; i++) {
         const file = images[i];
@@ -80,8 +50,6 @@ export default function Admin() {
         const { data } = supabase.storage.from("thrifty-images").getPublicUrl(fileName);
         imageUrls.push(data.publicUrl);
       }
-
-      // 2. Upload video if any
       let videoUrl = null;
       if (videoFile) {
         const vName = `${Date.now()}-video-${videoFile.name.replaceAll(" ", "-")}`;
@@ -90,8 +58,6 @@ export default function Admin() {
         const { data } = supabase.storage.from("thrifty-images").getPublicUrl(vName);
         videoUrl = data.publicUrl;
       }
-
-      // 3. Save product
       const { error } = await supabase.from("products").insert({
         name, price: Number(price),
         old_price: oldPrice ? Number(oldPrice) : null,
@@ -101,7 +67,6 @@ export default function Admin() {
         video_url: videoUrl,
       });
       if (error) throw error;
-
       setName(""); setPrice(""); setOldPrice(""); setTag(""); setSize(""); setDescription("");
       setImages([]); setImagePreviews([]); setVideoFile(null); setVideoPreview("");
       fetchProducts();
@@ -124,11 +89,39 @@ export default function Admin() {
     fetchProducts();
   };
 
+  // LUXURY LOGIN - RETURN EARLY IF NOT AUTHED
+  if (!authed) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center px-5 relative overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-[#C9A227]/10 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-[#C9A227]/10 rounded-full blur-[100px]" />
+        <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[28px] p-8 w-full max-w-[420px] text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+          <div className="w-[70px] h-[70px] mx-auto rounded-full bg-gradient-to-br from-[#F5D67B] via-[#C9A227] to-[#8A6D1B] flex items-center justify-center text-[30px] shadow-lg shadow-[#C9A227]/30">👑</div>
+          <p className="text-[#C9A227] text-[11px] tracking-[0.3em] font-bold mt-5">THRIFTY LUXE</p>
+          <h1 className="font-serif font-bold text-[28px] mt-1 leading-tight">Welcome Back,<br />Boss Lady ✨</h1>
+          <p className="text-white/50 text-[13px] mt-2">Manage your boutique with elegance</p>
+          <input
+            type="password"
+            value={passInput}
+            onChange={(e) => setPassInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && passInput === ADMIN_PASSWORD) setAuthed(true); }}
+            placeholder="Enter your secret password"
+            className="w-full mt-7 bg-[#0A0A0A] border border-white/10 rounded-full px-5 py-4 text-[14px] text-center outline-none focus:border-[#C9A227]/60 placeholder:text-white/30"
+          />
+          <button onClick={() => passInput === ADMIN_PASSWORD ? setAuthed(true) : alert("Wrong password!")} className="w-full mt-3 bg-gradient-to-r from-[#F5D67B] via-[#C9A227] to-[#A8861D] text-black font-bold py-4 rounded-full shadow-lg shadow-[#C9A227]/30 active:scale-[0.98] transition">
+            Unlock Dashboard →
+          </button>
+          <p className="text-white/25 text-[11px] mt-4">Secured • Private • Only for you</p>
+        </div>
+      </div>
+    );
+  }
+
   const totalValue = list.reduce((sum, p) => sum + p.price, 0);
   const inStockCount = list.filter(p => p.in_stock).length;
 
   return (
-    <div className="bg-[#050505] min-h-screen">
+    <div className="bg-[#050505] min-h-screen text-white">
       <div className="sticky top-0 z-20 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -182,30 +175,29 @@ export default function Admin() {
             <div><label className={labelClass}>Tag — HOT / NEW / RARE</label><input value={tag} onChange={(e) => setTag(e.target.value)} placeholder="e.g. HOT" className={inputClass} /></div>
             <div className="md:col-span-2"><label className={labelClass}>Description</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell customers why this piece is special..." className={`${inputClass} min-h-[90px] resize-none`} /></div>
 
-            {/* PICTURES */}
             <div className="md:col-span-2">
               <label className={labelClass}>Product Pictures * ({imagePreviews.length})</label>
               <div className="border-2 border-dashed border-[#C9A227]/40 rounded-2xl p-4 bg-[#0A0A0A] text-center">
                 <p className="text-[13px]">📸 Tap to add pictures from Gallery / Camera</p>
                 <label className="block mt-3 bg-[#C9A227] text-black font-bold py-3.5 rounded-full text-[13px] cursor-pointer">
                   📷 TAP TO ADD PICTURES
-                  <input type="file" multiple accept="image/*" onChange={(e)=>{
+                  <input type="file" multiple accept="image/*" onChange={(e) => {
                     const picked = Array.from(e.target.files || []) as File[];
-                    setImages(prev=>[...prev, ...picked]);
-                    picked.forEach(f=>{
+                    setImages(prev => [...prev, ...picked]);
+                    picked.forEach(f => {
                       const r = new FileReader();
-                      r.onload = (ev:any)=> setImagePreviews(prev=>[...prev, ev.target.result]);
+                      r.onload = (ev: any) => setImagePreviews(prev => [...prev, ev.target.result]);
                       r.readAsDataURL(f);
                     });
                   }} className="hidden" />
                 </label>
                 {imagePreviews.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mt-3">
-                    {imagePreviews.map((src,i)=>(
+                    {imagePreviews.map((src, i) => (
                       <div key={i} className="relative">
                         <img src={src} className="w-full h-[80px] object-cover rounded-xl" />
-                        <button type="button" onClick={()=>{ setImages(images.filter((_,idx)=>idx!==i)); setImagePreviews(imagePreviews.filter((_,idx)=>idx!==i)); }} className="absolute -top-1 -right-1 bg-red-500 text-white w-[20px] h-[20px] rounded-full text-[10px]">✕</button>
-                        {i===0 && <span className="absolute bottom-1 left-1 bg-black text-white text-[8px] px-2 py-0.5 rounded-full">MAIN</span>}
+                        <button type="button" onClick={() => { setImages(images.filter((_, idx) => idx !== i)); setImagePreviews(imagePreviews.filter((_, idx) => idx !== i)); }} className="absolute -top-1 -right-1 bg-red-500 text-white w-[20px] h-[20px] rounded-full text-[10px]">✕</button>
+                        {i === 0 && <span className="absolute bottom-1 left-1 bg-black text-white text-[8px] px-2 py-0.5 rounded-full">MAIN</span>}
                       </div>
                     ))}
                   </div>
@@ -213,22 +205,21 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* VIDEO */}
             <div className="md:col-span-2">
               <label className={labelClass}>Product Video (Optional)</label>
               <div className="border-2 border-dashed border-white/15 rounded-2xl p-4 bg-[#0A0A0A] text-center">
                 <p className="text-[13px]">🎥 Tap to add 1 video</p>
                 <label className="block mt-3 bg-white text-black font-bold py-3.5 rounded-full text-[13px] cursor-pointer">
                   🎬 TAP TO ADD VIDEO
-                  <input type="file" accept="video/*" onChange={(e)=>{
+                  <input type="file" accept="video/*" onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if(f){ setVideoFile(f); setVideoPreview(URL.createObjectURL(f)); }
+                    if (f) { setVideoFile(f); setVideoPreview(URL.createObjectURL(f)); }
                   }} className="hidden" />
                 </label>
                 {videoPreview && (
                   <div className="mt-3">
                     <video src={videoPreview} controls className="w-full rounded-xl" />
-                    <button type="button" onClick={()=>{setVideoFile(null); setVideoPreview("");}} className="mt-2 bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-full text-[11px]">Remove Video ✕</button>
+                    <button type="button" onClick={() => { setVideoFile(null); setVideoPreview(""); }} className="mt-2 bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-full text-[11px]">Remove Video ✕</button>
                   </div>
                 )}
               </div>
@@ -255,7 +246,7 @@ export default function Admin() {
           {list.map((p) => (
             <div key={p.id} className="bg-white/[0.03] border border-white/10 rounded-[22px] p-4 flex gap-4 hover:border-[#C9A227]/30 transition group">
               <div className="w-[72px] h-[72px] shrink-0 rounded-2xl overflow-hidden bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-[32px]">
-                {(p any).images?.[0] ? <img src={(p any).images[0]} className="w-full h-full object-cover" /> : "🛍️"}
+                {p.images?.[0] ? <img src={p.images[0]} className="w-full h-full object-cover" /> : "👗"}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
@@ -264,7 +255,7 @@ export default function Admin() {
                 </div>
                 <p className="text-white/50 text-[12px] mt-1">{p.category} • Size {p.size}</p>
                 <p className="font-bold text-[#F5D67B] mt-1.5">{formatNaira(p.price)} {p.old_price && <span className="text-white/35 line-through text-[12px] font-normal ml-1">{formatNaira(p.old_price)}</span>}</p>
-                {(p any).video_url && <p className="text-[11px] text-purple-300 mt-1">🎥 Video attached</p>}
+                {p.video_url && <p className="text-[11px] text-purple-300 mt-1">🎥 Video attached</p>}
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => toggleStock(p)} className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${p.in_stock ? "bg-green-500/15 text-green-400 border border-green-500/20" : "bg-red-500/15 text-red-400 border border-red-500/20"}`}>{p.in_stock ? "● In Stock" : "○ Sold Out"}</button>
                   <button onClick={() => deleteProduct(p.id)} className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Delete</button>
@@ -283,4 +274,4 @@ export default function Admin() {
       </div>
     </div>
   );
-      }
+                                                                                                                        }
